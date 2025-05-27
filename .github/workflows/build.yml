@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  pages: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -15,8 +19,15 @@ jobs:
           version: 8
       - run: pnpm install
       - run: pnpm run build
-      - uses: JamesIves/github-pages-deploy-action@v4
+      - name: Debug Git Worktrees
+        run: git worktree list
+      - name: Clean Worktrees
+        run: |
+          git worktree prune
+          rm -rf .git/worktrees/github-pages-deploy-action-temp-deployment-folder || true
+      - uses: JamesIves/github-pages-deploy-action@v4.6.1
         with:
           branch: gh-pages
           folder: dist
           clean: true
+          create-orphan: true
